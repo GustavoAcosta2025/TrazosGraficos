@@ -52,7 +52,7 @@ public class FrmTrazos extends JFrame {
 
                 // Dibujar trazo temporal si se está trazando
                 if (trazando) {
-                    g.setColor(Color.GRAY); // Color para el trazo temporal
+                    g.setColor(Color.BLUE); // Color para el trazo temporal
                     switch (opciones[ComboBox.getSelectedIndex()]) {
                         case "Linea":
                             g.drawLine(x, y, xTemp, yTemp);
