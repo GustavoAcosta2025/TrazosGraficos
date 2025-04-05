@@ -1,5 +1,8 @@
 public class App {
     public static void main(String[] args) throws Exception {
-        new FrmTrazos().setVisible(true);
+        FrmTrazos j=new FrmTrazos();
+        j.setVisible(true);
+        j.setLocationRelativeTo(null);
+        j.setResizable(false);
     }
 }

@@ -13,176 +13,169 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.WindowConstants;
 
 public class FrmTrazos extends JFrame {
-    public String[] tipoTrazo = new String[]{"Línea", "Rectángulo", "Óvalo"};
-    JComboBox<String> cmbTipoTrazo;
-    JTextField txtInfo;
-    JPanel pnlDibujo;
-    int x, y;
-    boolean trazando = false;
+    Lista lista = new Lista();
+    Nodo nodoSeleccionado = null;
     BufferedImage imagen;
-    BufferedImage imagenTemporal;
+    String[] opciones = {"Linea", "Rectangulo", "Óvalo"};
+    JComboBox<String> ComboBox;
 
     private JButton btnSeleccionar;
     private JButton btnEliminar;
     private JButton btnGuardar;
     private JButton btnCargar;
+    private JToolBar tbDibujo;
+    private JPanel panel;
+
+    int x, y, xTemp, yTemp; // Coordenadas de inicio y temporales
+    boolean trazando = false;
 
     public FrmTrazos() {
-
+        tbDibujo = new JToolBar();
+        ComboBox = new JComboBox<>(opciones);
         btnSeleccionar = new JButton();
         btnEliminar = new JButton();
         btnGuardar = new JButton();
         btnCargar = new JButton();
 
-        setSize(500, 400);
-        setTitle("Editor de gráficas");
+        tbDibujo.add(ComboBox);
+        setSize(700, 500);
+        setTitle("Dibujos Vectoriales");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-        //Botontes configuracion
-        btnSeleccionar.setIcon(new ImageIcon(getClass().getResource("/imagenes/mouse.png")));
-        btnSeleccionar.setToolTipText("Seleccionar Tipo Trazo");
-        btnSeleccionar.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                
-            }
-        });
-        cmbTipoTrazo.add(btnSeleccionar);
-
-        btnEliminar.setIcon(new ImageIcon(getClass().getResource("/imagenes/delete.png")));
-        btnEliminar.setToolTipText("Eliminar");
-        btnEliminar.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                
-            }
-        });
-        cmbTipoTrazo.add(btnEliminar);
-
-        btnGuardar.setIcon(new ImageIcon(getClass().getResource("/imagenes/save.png")));
-        btnGuardar.setToolTipText("Guardar");
-        btnGuardar.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                
-            }
-        });
-        cmbTipoTrazo.add(btnGuardar);
-
-        btnCargar.setIcon(new ImageIcon(getClass().getResource("/imagenes/Cargar.jpg")));
-        btnGuardar.setToolTipText("Cargar");
-        btnGuardar.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                
-            }
-        });
-        cmbTipoTrazo.add(btnGuardar);
-
-        JToolBar tbTrazos = new JToolBar();
-        cmbTipoTrazo = new JComboBox<>(tipoTrazo);
-        tbTrazos.add(cmbTipoTrazo);
-
-        txtInfo = new JTextField();
-        tbTrazos.add(txtInfo);
-
-        pnlDibujo = new JPanel() {
+        panel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                g.drawImage(imagen, 0, 0, this);
-                g.drawImage(imagenTemporal, 0, 0, this);
+                lista.dibujarTrazos(g, nodoSeleccionado);
+
+                // Dibujar trazo temporal si se está trazando
+                if (trazando) {
+                    g.setColor(Color.GRAY); // Color para el trazo temporal
+                    switch (opciones[ComboBox.getSelectedIndex()]) {
+                        case "Linea":
+                            g.drawLine(x, y, xTemp, yTemp);
+                            break;
+                        case "Rectangulo":
+                            g.drawRect(Math.min(x, xTemp), Math.min(y, yTemp),
+                                    Math.abs(xTemp - x), Math.abs(yTemp - y));
+                            break;
+                        case "Circulo":
+                            g.drawOval(Math.min(x, xTemp), Math.min(y, yTemp),
+                                    Math.abs(xTemp - x), Math.abs(yTemp - y));
+                            break;
+                    }
+                }
             }
         };
-        pnlDibujo.setBackground(Color.BLACK);
 
-        getContentPane().add(tbTrazos, BorderLayout.NORTH);
-        getContentPane().add(pnlDibujo, BorderLayout.CENTER);
+        btnSeleccionar.setIcon(new ImageIcon(getClass().getResource("/imagenes/mouse.png")));
+        btnSeleccionar.setToolTipText("Seleccionar");
+        btnSeleccionar.addActionListener(e -> btnSeleccionarClick());
+        tbDibujo.add(btnSeleccionar);
 
-        imagen = new BufferedImage(500, 400, BufferedImage.TYPE_INT_ARGB);
-        imagenTemporal = new BufferedImage(500, 400, BufferedImage.TYPE_INT_ARGB);
+        panel.setBackground(Color.BLACK);
+        panel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                x = e.getX();
+                y = e.getY();
+                xTemp = x;
+                yTemp = y;
+                trazando = true;
+            }
 
-        pnlDibujo.addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent me) {
-                dibujar(me.getX(), me.getY());
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (trazando) {
+                    int x2 = e.getX();
+                    int y2 = e.getY();
+                    String tipo = opciones[ComboBox.getSelectedIndex()];
+                    lista.agregar(new Nodo(tipo, x, y, x2, y2));
+                    trazando = false;
+                    panel.repaint();
+                }
+            }
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                nodoSeleccionado = lista.seleccionarNodo(e.getX(), e.getY());
+                panel.repaint();
             }
         });
 
-        pnlDibujo.addMouseMotionListener(new MouseMotionAdapter() {
-            public void mouseMoved(MouseEvent me) {
-                dibujarTemporal(me.getX(), me.getY());
+        // 📌 **Nuevo Listener para actualizar las coordenadas temporales**
+        panel.addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                if (trazando) {
+                    xTemp = e.getX();
+                    yTemp = e.getY();
+                    panel.repaint(); // Redibujar para mostrar el trazo temporal
+                }
             }
         });
+
+        btnEliminar.setIcon(new ImageIcon(getClass().getResource("/imagenes/delete.png")));
+        btnEliminar.setToolTipText("Eliminar");
+        btnEliminar.addActionListener(e -> btnEliminarClick());
+        tbDibujo.add(btnEliminar);
+
+        btnGuardar.setIcon(new ImageIcon(getClass().getResource("/imagenes/save.png")));
+        btnGuardar.setToolTipText("Guardar");
+        btnGuardar.addActionListener(e -> btnGuardarClick());
+        tbDibujo.add(btnGuardar);
+
+        btnCargar.setIcon(new ImageIcon(getClass().getResource("/imagenes/Cargar.jpg")));
+        btnCargar.setToolTipText("Cargar");
+        btnCargar.addActionListener(e -> btnCargarClick());
+        tbDibujo.add(btnCargar);
+
+        getContentPane().add(tbDibujo, BorderLayout.SOUTH);
+        getContentPane().add(panel, BorderLayout.CENTER);
+
+        imagen = new BufferedImage(700, 500, BufferedImage.TYPE_INT_ARGB);
     }
 
-    private void dibujar(int x, int y) {
-        Graphics g = imagen.getGraphics();
-        g.setColor(Color.RED);
+    private void btnSeleccionarClick() {
+        nodoSeleccionado = null;
+        panel.repaint();
+    }
 
-        if (!trazando) {
-            trazando = true;
-            this.x = x;
-            this.y = y;
-            txtInfo.setText("Trazando desde x=" + this.x + ", y=" + this.y);
-        } else {
-            trazando = false;
-            Graphics gTemp = imagenTemporal.getGraphics();
-            gTemp.setColor(Color.RED); 
-            
-            int ancho = Math.abs(this.x - x);
-            int alto = Math.abs(this.y - y);
-            int x1 = Math.min(this.x, x);
-            int y1 = Math.min(this.y, y);
-
-            switch (cmbTipoTrazo.getSelectedIndex()) {
-                case 0 -> {
-                    g.drawLine(this.x, this.y, x, y);
-                    gTemp.drawLine(this.x, this.y, x, y);
-                }
-                case 1 -> {
-                    g.drawRect(x1, y1, ancho, alto);
-                    gTemp.drawRect(x1, y1, ancho, alto);
-                }
-                case 2 -> {
-                    g.drawOval(x1, y1, ancho, alto);
-                    gTemp.drawOval(x1, y1, ancho, alto);
-                }
-            }
-
-            limpiarImagenTemporal();
-            txtInfo.setText("");
-            pnlDibujo.repaint();
+    private void btnEliminarClick() {
+        if (nodoSeleccionado != null) {
+            lista.eliminarNodo(nodoSeleccionado);
+            nodoSeleccionado = null;
+            panel.repaint();
         }
     }
 
-    private void dibujarTemporal(int x, int y) {
-        if (trazando) {
-            limpiarImagenTemporal();
-            Graphics2D g2 = imagenTemporal.createGraphics();
-            g2.setColor(Color.YELLOW);
-
-            int ancho = Math.abs(this.x - x);
-            int alto = Math.abs(this.y - y);
-            int x1 = Math.min(this.x, x);
-            int y1 = Math.min(this.y, y);
-
-            switch (cmbTipoTrazo.getSelectedIndex()) {
-                case 0 -> g2.drawLine(this.x, this.y, x, y);
-                case 1 -> g2.drawRect(x1, y1, ancho, alto);
-                case 2 -> g2.drawOval(x1, y1, ancho, alto);
+    private void btnGuardarClick() {
+        String rutaArchivo = Archivo.elegirArchivo();
+        if (!rutaArchivo.isEmpty()) {
+            if (!rutaArchivo.endsWith(".dbj")) {
+                rutaArchivo += ".dbj"; // Asegurar extensión
             }
-
-            pnlDibujo.repaint();
+            if (Archivo.guardarArchivo(rutaArchivo, lista.obtenerDatos())) {
+                JOptionPane.showMessageDialog(this, "Dibujo guardado exitosamente.");
+            } else {
+                JOptionPane.showMessageDialog(this, "Error al guardar el archivo.");
+            }
         }
     }
 
-    private void limpiarImagenTemporal() {
-        Graphics2D g2 = imagenTemporal.createGraphics();
-        g2.setComposite(AlphaComposite.Clear);
-        g2.fillRect(0, 0, imagenTemporal.getWidth(), imagenTemporal.getHeight());
-        g2.setComposite(AlphaComposite.SrcOver);
+    private void btnCargarClick() {
+        String rutaArchivo = Archivo.elegirArchivo();
+        if (!rutaArchivo.isEmpty()) {
+            lista.cargarDesdeArchivo(rutaArchivo);
+            panel.repaint();
+            JOptionPane.showMessageDialog(this, "Dibujo cargado exitosamente.");
+        }
     }
-
 }
