@@ -61,7 +61,7 @@ public class FrmTrazos extends JFrame {
                             g.drawRect(Math.min(x, xTemp), Math.min(y, yTemp),
                                     Math.abs(xTemp - x), Math.abs(yTemp - y));
                             break;
-                        case "Circulo":
+                        case "Óvalo":
                             g.drawOval(Math.min(x, xTemp), Math.min(y, yTemp),
                                     Math.abs(xTemp - x), Math.abs(yTemp - y));
                             break;
