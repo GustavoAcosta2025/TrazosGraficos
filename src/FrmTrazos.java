@@ -1,21 +1,16 @@
-import java.awt.AlphaComposite;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.awt.image.BufferedImage;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.WindowConstants;
 
@@ -163,9 +158,9 @@ public class FrmTrazos extends JFrame {
                 rutaArchivo += ".dbj"; // Asegurar extensión
             }
             if (Archivo.guardarArchivo(rutaArchivo, lista.obtenerDatos())) {
-                JOptionPane.showMessageDialog(this, "Dibujo guardado exitosamente.");
+                JOptionPane.showMessageDialog(this, "El dibujo ha sido guardado.");
             } else {
-                JOptionPane.showMessageDialog(this, "Error al guardar el archivo.");
+                JOptionPane.showMessageDialog(this, "No fue posible guardar el dibujo.");
             }
         }
     }
@@ -175,7 +170,7 @@ public class FrmTrazos extends JFrame {
         if (!rutaArchivo.isEmpty()) {
             lista.cargarDesdeArchivo(rutaArchivo);
             panel.repaint();
-            JOptionPane.showMessageDialog(this, "Dibujo cargado exitosamente.");
+            JOptionPane.showMessageDialog(this, "El dibujo ha sido cargado.");
         }
     }
 }

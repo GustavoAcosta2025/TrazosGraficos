@@ -6,24 +6,15 @@ import java.io.IOException;
 public class Lista {
     private Nodo cabeza;
 
-    public Lista() {
-        cabeza = null;
-    }
-
-    public void agregar(Nodo trazo) {
-        if (trazo != null) {
-            if (cabeza == null) {
-                cabeza = trazo;
-            } else {
-                // ubicar el último nodo
-                Nodo apuntador = cabeza;
-                while (apuntador.siguiente != null) {
-                    apuntador = apuntador.siguiente;
-                }
-                // unir el nuevo nodo
-                apuntador.siguiente = trazo;
+    public void agregar(Nodo nuevoNodo) {
+        if (cabeza == null) {
+            cabeza = nuevoNodo;
+        } else {
+            Nodo actual = cabeza;
+            while (actual.siguiente != null) {
+                actual = actual.siguiente;
             }
-            trazo.siguiente = null;
+            actual.siguiente = nuevoNodo;
         }
     }
 
@@ -35,56 +26,56 @@ public class Lista {
             return;
         }
 
-        Nodo apuntador = cabeza;
-        while (apuntador.siguiente != null) {
-            if (apuntador.siguiente == nodoAEliminar) {
-                apuntador.siguiente = apuntador.siguiente.siguiente;
+        Nodo actual = cabeza;
+        while (actual.siguiente != null) {
+            if (actual.siguiente == nodoAEliminar) {
+                actual.siguiente = actual.siguiente.siguiente;
                 return;
             }
-            apuntador = apuntador.siguiente;
+            actual = actual.siguiente;
         }
     }
 
     public Nodo seleccionarNodo(int x, int y) {
-        Nodo apuntador = cabeza;
-        while (apuntador != null) {
-            if (x >= Math.min(apuntador.x1, apuntador.x2) && x <= Math.max(apuntador.x1, apuntador.x2) &&
-                    y >= Math.min(apuntador.y1, apuntador.y2) && y <= Math.max(apuntador.y1, apuntador.y2)) {
-                return apuntador;
+        Nodo actual = cabeza;
+        while (actual != null) {
+            if (x >= Math.min(actual.x1, actual.x2) && x <= Math.max(actual.x1, actual.x2) &&
+                    y >= Math.min(actual.y1, actual.y2) && y <= Math.max(actual.y1, actual.y2)) {
+                return actual;
             }
-            apuntador = apuntador.siguiente;
+            actual = actual.siguiente;
         }
         return null;
     }
 
     public void dibujarTrazos(Graphics g, Nodo nodoSeleccionado) {
-        Nodo apuntador = cabeza;
-        while (apuntador != null) {
-            g.setColor(apuntador == nodoSeleccionado ? Color.RED : Color.WHITE);
-            switch (apuntador.tipoTrazo) {
-                case "Linea" -> g.drawLine(apuntador.x1, apuntador.y1, apuntador.x2, apuntador.y2);
-                case "Rectangulo" -> g.drawRect(Math.min(apuntador.x1, apuntador.x2), Math.min(apuntador.y1, apuntador.y2),
-                        Math.abs(apuntador.x2 - apuntador.x1), Math.abs(apuntador.y2 - apuntador.y1));
-                case "Óvalo" -> g.drawOval(Math.min(apuntador.x1, apuntador.x2), Math.min(apuntador.y1, apuntador.y2),
-                        Math.abs(apuntador.x2 - apuntador.x1), Math.abs(apuntador.y2 - apuntador.y1));
+        Nodo actual = cabeza;
+        while (actual != null) {
+            g.setColor(actual == nodoSeleccionado ? Color.RED : Color.WHITE);
+            switch (actual.tipoTrazo) {
+                case "Linea" -> g.drawLine(actual.x1, actual.y1, actual.x2, actual.y2);
+                case "Rectangulo" -> g.drawRect(Math.min(actual.x1, actual.x2), Math.min(actual.y1, actual.y2),
+                        Math.abs(actual.x2 - actual.x1), Math.abs(actual.y2 - actual.y1));
+                case "Circulo" -> g.drawOval(Math.min(actual.x1, actual.x2), Math.min(actual.y1, actual.y2),
+                        Math.abs(actual.x2 - actual.x1), Math.abs(actual.y2 - actual.y1));
             }
-            apuntador = apuntador.siguiente;
+            actual = actual.siguiente;
         }
     }
 
     public String[] obtenerDatos() {
         int tamaño = contarNodos();
         String[] datos = new String[tamaño];
-        Nodo apuntador = cabeza;
+        Nodo actual = cabeza;
         int i = 0;
-        while (apuntador != null) {
-            datos[i++] = apuntador.tipoTrazo + ";" + apuntador.x1 + ";" + apuntador.y1 + ";" + apuntador.x2 + ";" + apuntador.y2;
-            apuntador = apuntador.siguiente;
+        while (actual != null) {
+            datos[i++] = actual.tipoTrazo + ";" + actual.x1 + ";" + actual.y1 + ";" + actual.x2 + ";" + actual.y2;
+            actual = actual.siguiente;
         }
         return datos;
     }
 
-     public void cargarDesdeArchivo(String ruta) {
+    public void cargarDesdeArchivo(String ruta) {
         cabeza = null;
         BufferedReader br = Archivo.abrirArchivo(ruta);
         if (br != null) {
@@ -104,14 +95,12 @@ public class Lista {
         }
     }
 
-
-
-    public int contarNodos() {
-        Nodo apuntador = cabeza;
+    private int contarNodos() {
         int contador = 0;
-        while (apuntador != null) {
-            apuntador = apuntador.siguiente;
+        Nodo actual = cabeza;
+        while (actual != null) {
             contador++;
+            actual = actual.siguiente;
         }
         return contador;
     }
